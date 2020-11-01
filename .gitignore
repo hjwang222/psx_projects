@@ -35,6 +35,3 @@
 *.bin
 *.cue
 *.elf
-
-# VSCode files
-*.json
