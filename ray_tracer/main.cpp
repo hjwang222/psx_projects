@@ -78,8 +78,8 @@ class Sphere
 	}
 };
 
-int num_spheres = 2;
-Sphere scene_objects[2];
+int num_spheres = 3;
+Sphere scene_objects[3];
 
 void get_intersecting_object(const Vector& origin, const Vector& direction, int& idx, double& tnear)
 {
@@ -112,7 +112,7 @@ Vector trace(const Vector& origin, const Vector& direction)
 	if (cur_idx != -1)
 	{
 		Sphere * current_object = &scene_objects[cur_idx];
-		double bias = -0.01;
+		double bias = -0.001;
 		Vector phit = origin + direction*(tnear + bias);
 		Vector nhit = (phit - current_object->pos).normalize();
 		
@@ -130,7 +130,7 @@ Vector trace(const Vector& origin, const Vector& direction)
 
 				int shadow_ray_idx;
 				get_intersecting_object(phit, light_dir, shadow_ray_idx, tnear);
-				if (shadow_ray_idx == cur_idx) {
+				if (shadow_ray_idx == idx) {
 					Vector object_colour = object->material.surface_colour;
 					Vector light_colour = scene_objects[shadow_ray_idx].material.emission_colour;
 					double intensity = nhit.dot(light_dir)*(1.0/light_dist);
@@ -226,13 +226,19 @@ int main(){
 	light_material.emission_colour = Vector(50,0,0);
 	light_material.surface_colour = Vector(1,1,1);
 
-	Material surface_material;
-	surface_material.surface_colour = Vector(1,0,0);
+	scene_objects[0] = Sphere(Vector(10,10,-50),2,light_material);
 
-	scene_objects[0] = Sphere(Vector(10,-10,-50),2,light_material);
-	scene_objects[1] = Sphere(Vector(0,0,-300), 50, surface_material);
+	{
+		Material surface_material;
+		surface_material.surface_colour = Vector(1,0,0);
+		scene_objects[1] = Sphere(Vector(0,0,-300), 50, surface_material);
+	}
 
-	DrawFBRect(0,0, 320, 240, 255, 255, 255);
+	{
+		Material surface_material;
+		surface_material.surface_colour = Vector(0,0,1);
+		scene_objects[2] = Sphere(Vector(0,0,-150), 10, surface_material);
+	}
 	
 	while(1) {
 		render(320, 240, 30);
