@@ -3,7 +3,7 @@ extern "C" {
 }
 
 class Vector{
-    // public
+    public:
     double x,y,z;
     Vector()
     {
@@ -17,7 +17,7 @@ class Vector{
         z = _z;
     }
 
-    Vector operator+(const Vector& v)
+    Vector operator+(const Vector& v) const
     {
         Vector result;
         result.x = x + v.x;
@@ -26,7 +26,7 @@ class Vector{
         return result;
     }
 
-    Vector operator-(const Vector& v)
+    Vector operator-(const Vector& v) const
     {
         Vector result;
         result.x = x - v.x;
@@ -35,7 +35,7 @@ class Vector{
         return result;
     }
 
-    Vector operator* (double n)
+    Vector operator* (double n) const
     {
         Vector result;
         result.x = x * n;
@@ -44,7 +44,16 @@ class Vector{
         return result;
     }
 
-    Vector operator/ (double n)
+    Vector operator* (const Vector& v) const
+    {
+        Vector result;
+        result.x = x * v.x;
+        result.y = y * v.y;
+        result.z = z * v.z;
+        return result;
+    }
+
+    Vector operator/ (double n) const
     {
         Vector result;
         result.x = x / n;
@@ -53,12 +62,12 @@ class Vector{
         return result;
     }
 
-    double dot(const Vector& v)
+    double dot(const Vector& v) const
     {
         return x*v.x + y*v.y + z*v.z;
     }
 
-    Vector cross(const Vector& v)
+    Vector cross(const Vector& v) const
     {
         Vector result;
 
@@ -69,12 +78,12 @@ class Vector{
         return result;
     }
 
-    double magnitude()
+    double magnitude() const
     {
         return sqrt(x*x + y*y + z*z);
     }
 
-    Vector normalize()
+    Vector normalize() const
     {
         Vector result;
         result = (*this)/magnitude();
