@@ -30,3 +30,11 @@
 *.exe
 *.out
 *.app
+
+# PSX files
+*.bin
+*.cue
+*.elf
+
+# VSCode files
+*.json
