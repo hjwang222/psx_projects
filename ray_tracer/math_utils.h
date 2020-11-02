@@ -80,7 +80,7 @@ class Vector{
 
     double magnitude() const
     {
-        return sqrt(x*x + y*y + z*z);
+        return sqrt((x*x) + (y*y) + (z*z));
     }
 
     Vector normalize() const

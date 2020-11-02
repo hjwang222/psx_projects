@@ -203,7 +203,7 @@ int main(){
 
 	// setup draw environment
 	game_draw_env.dither = 0;
-	game_draw_env.draw_on_display = 1;
+	game_draw_env.draw_on_display = 0;
 	game_draw_env.x = 0;
 	game_draw_env.y = 0;
 	game_draw_env.w = 320;
@@ -215,7 +215,7 @@ int main(){
 	
 	// setup display environment
 	game_disp_env.x = 0;
-	game_disp_env.y = 0;
+	game_disp_env.y = 256;
 	GsSetDispEnv(&game_disp_env);
 	GsSetList(game_draw_list);
 
@@ -242,6 +242,18 @@ int main(){
 	
 	while(1) {
 		render(320, 240, 30);
+
+		if (game_disp_env.y == 256) {
+			game_disp_env.y = 0;
+			game_draw_env.y = 256;
+		}
+		else {
+			game_disp_env.y = 256;
+			game_draw_env.y = 0;
+		}
+		
+		GsSetDispEnv(&game_disp_env);
+		GsSetDrawEnv(&game_draw_env);
 	}
 	
 	return 0;
