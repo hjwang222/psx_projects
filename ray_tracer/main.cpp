@@ -111,39 +111,40 @@ Vector trace(const Vector& origin, const Vector& direction)
 
 	if (cur_idx != -1)
 	{
-		Sphere * current_object = &scene_objects[cur_idx];
-		double bias = -0.001;
-		Vector phit = origin + direction*(tnear + bias);
-		Vector nhit = (phit - current_object->pos).normalize();
+		result.x(1.0);
+		// Sphere * current_object = &scene_objects[cur_idx];
+		// double bias = 0.0;
+		// Vector phit = origin + direction*(tnear + bias);
+		// Vector nhit = (phit - current_object->pos).normalize();
 		
-		if (current_object->material.is_light()) {
-			Material * material = &(current_object->material);
-			return (material->surface_colour*material->emission_colour)*(1.0/tnear);
-		}
+		// if (current_object->material.is_light()) {
+		// 	Material * material = &(current_object->material);
+		// 	return (material->surface_colour*material->emission_colour)*(1.0/tnear);
+		// }
 
-		for (int idx = 0 ; idx < num_spheres ; idx++) {
-			Sphere * object = &scene_objects[idx];
-			if (object->material.is_light()) {
-				Vector light_dir = object->pos - phit;
-				double light_dist = light_dir.magnitude();
-				light_dir = light_dir.normalize();
+		// for (int idx = 0 ; idx < num_spheres ; idx++) {
+		// 	Sphere * object = &scene_objects[idx];
+		// 	if (object->material.is_light()) {
+		// 		Vector light_dir = object->pos - phit;
+		// 		double light_dist = light_dir.magnitude();
+		// 		light_dir = light_dir.normalize();
 
-				int shadow_ray_idx;
-				get_intersecting_object(phit, light_dir, shadow_ray_idx, tnear);
-				if (shadow_ray_idx == idx) {
-					Vector object_colour = object->material.surface_colour;
-					Vector light_colour = scene_objects[shadow_ray_idx].material.emission_colour;
-					double intensity = nhit.dot(light_dir)*(1.0/light_dist);
-					if (intensity > 1.0) {
-						intensity = 1.0;
-					}
-					else if (intensity < 0.0) {
-						intensity = 0.0;
-					}
-					result = result + (object_colour*light_colour)*intensity;
-				}
-			}
-		}
+		// 		int shadow_ray_idx;
+		// 		get_intersecting_object(phit, light_dir, shadow_ray_idx, tnear);
+		// 		if (shadow_ray_idx == idx) {
+		// 			Vector object_colour = object->material.surface_colour;
+		// 			Vector light_colour = scene_objects[shadow_ray_idx].material.emission_colour;
+		// 			double intensity = nhit.dot(light_dir)*(1.0/light_dist);
+		// 			if (intensity > 1.0) {
+		// 				intensity = 1.0;
+		// 			}
+		// 			else if (intensity < 0.0) {
+		// 				intensity = 0.0;
+		// 			}
+		// 			result = result + (object_colour*light_colour)*intensity;
+		// 		}
+		// 	}
+		// }
 	}
 
 	return result;
@@ -171,23 +172,23 @@ void render(int width, int height, int fov)
 			Vector ray = Vector(xx, yy, -1).normalize();
 			Vector colour = trace(origin, ray);
 
-			if (colour.x > 1.0) {
-				colour.x = 1.0;
+			if (colour.x() > 1.0) {
+				colour.x(1.0);
 			}
 
-			if (colour.y > 1.0) {
-				colour.y = 1.0;
+			if (colour.y() > 1.0) {
+				colour.y(1.0);
 			}
 
-			if (colour.z > 1.0) {
-				colour.z = 1.0;
+			if (colour.z() > 1.0) {
+				colour.z(1.0);
 			}
 
 			pixel.x = x;
 			pixel.y = y;
-			pixel.r = colour.x * 255;
-			pixel.g = colour.y * 255;
-			pixel.b = colour.z * 255;
+			pixel.r = colour.x() * 255;
+			pixel.g = colour.y() * 255;
+			pixel.b = colour.z() * 255;
 			GsSortRectangle(&pixel);
 		}
 		GsDrawList();
@@ -219,7 +220,7 @@ int main(){
 	GsSetDispEnv(&game_disp_env);
 	GsSetList(game_draw_list);
 
-	GsSetVideoMode(320, 240, VMODE_PAL);
+	GsSetVideoMode(320, 240, VMODE_NTSC);
 	SetVBlankHandler(game_vblank_handler);
 
 	Material light_material;

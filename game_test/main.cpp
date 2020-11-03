@@ -1,6 +1,7 @@
 extern "C"
 {
     #include <psx.h>
+    #include <meidogte.h>
 }
 
 GsDrawEnv game_draw_env;
@@ -49,6 +50,7 @@ int main()
     PSX_Init();
     GsInit();
     GsClearMem();
+    InitGeom();
     SsInit();
 
     game_draw_env.dither = 0;
@@ -68,9 +70,6 @@ int main()
 
     GsSetVideoMode(WIDTH, HEIGHT, VMODE_PAL);
     SetVBlankHandler(vblank);
-
-    // DrawFBRect(0,0,WIDTH, HEIGHT, CORNFLOUR_BLUE);
-    // DrawFBRect(0,HEIGHT, WIDTH, HEIGHT, 255, 0, 0);
 
     // update
     while(1) {

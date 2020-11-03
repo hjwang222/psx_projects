@@ -1,6 +1,6 @@
 all:
 	mkdir -p cd_root
-	psx-gcc -O2 -Wno-narrowing -std=c++11 -o ptx.elf main.cpp -lm
+	psx-gcc -O2 -Wno-narrowing -std=c++11 -I../utils -o ptx.elf main.cpp -lm -lfixmath
 	elf2exe ptx.elf ptx.exe
 	cp ptx.exe cd_root
 	systemcnf ptx.exe > cd_root/system.cnf
