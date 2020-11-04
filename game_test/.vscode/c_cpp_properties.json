@@ -4,6 +4,7 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
+                "${workspaceFolder}/../utils/**",
                 "${workspaceFolder}/../../psxsdk/include/**"
             ],
             "defines": [],

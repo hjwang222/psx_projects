@@ -1,7 +1,7 @@
 all:
 	mkdir -p cd_root
 	#-lm is for the math.h header and -lstdc++ is for c++ features like new/delete
-	psx-gcc -O2 -Wno-narrowing -std=c++11 -o game.elf main.cpp -lm -lstdc++
+	psx-gcc -O2 -Wno-narrowing -I../utils -std=c++11 -o game.elf main.cpp -lm -lstdc++ -lmeidogte
 	elf2exe game.elf game.exe
 	cp game.exe cd_root
 	#cp data/*.tim cd_root
