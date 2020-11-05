@@ -183,6 +183,17 @@ public:
                 }
             }
         }
+        return result;
+    }
+
+    Vector operator*(const Vector& vec) {
+        Vector result;
+        
+        for (int row = 0 ; row < 4 ; row++) {
+            for (int col = 0 ; col < 4 ; col++) {
+                result.xyz[col] = fix16_mul(vec.xyz[col], m_values[row][col]);
+            }
+        }
 
         return result;
     }
