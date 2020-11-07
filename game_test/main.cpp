@@ -18,6 +18,9 @@ unsigned int last_tick = 0;
 #define HEIGHT 240
 #define DOUBLE_BUFFER_OFFSET 16
 
+Matrix perspective_matrix;
+Matrix view_matrix;
+
 void swap_buffers()
 {
     if (game_disp_env.y == 0) {
@@ -47,26 +50,37 @@ void logic_update()
 
 void render_update()
 {
-    unsigned char *image = new unsigned char[WIDTH*HEIGHT];
+    Matrix mvp = perspective_matrix;
 
-    for (int y = 0 ; y < HEIGHT; y++) {
-        for (int x = 0 ; x < WIDTH; x++) {
-            image[y*WIDTH + x] = isin(x * 8) % 255;
-        }   
-    }
+    Vector v0(0.0, 0.5, 0, 1.0);
+    Vector v1(-0.5, -0.5, 0, 1.0);
+    Vector v2(0.5, -0.5, 0, 1.0);
 
-    GsImage game_image;
-    game_image.x = WIDTH;
-    game_image.y = 0;
-    game_image.w = WIDTH;
-    game_image.h = HEIGHT;
-    game_image.has_clut = 0;
-    game_image.pmode = 1;
-    game_image.data = image;
-    GsUploadImage(&game_image);
+    // v0 = mvp*v0;
+    // v1 = mvp*v1;
+    // v2 = mvp*v2;
+
+    GsPrintFont(0,0,"x %d y %d", v0.screen_x(), v0.screen_y());
+    GsPrintFont(0,10,"x %d y %d", v1.screen_x(), v1.screen_y());
+    GsPrintFont(0,20,"x %d y %d", v2.screen_x(), v2.screen_y());
+
+    GsPoly3 tri;
+    tri.r = 255;
+    tri.g = tri.b = 0;
+
+    tri.x[0] = v0.screen_x();
+    tri.y[0] = v0.screen_y();
+
+    tri.x[1] = v1.screen_x();
+    tri.y[1] = v1.screen_y();
+
+    tri.x[2] = v2.screen_x();
+    tri.y[2] = v2.screen_y();
+
+    GsSortPoly3(&tri);
+    GsDrawList();
 
     while(GsIsDrawing()) {};
-    delete[] image;
 }
 
 int main()
@@ -95,6 +109,10 @@ int main()
 
     GsSetVideoMode(WIDTH, HEIGHT, VMODE_PAL);
     SetVBlankHandler(vblank);
+
+    GsLoadFont(320,1,320,0);
+
+    perspective_matrix = Matrix::perspective(30.0, (double)WIDTH/HEIGHT, 0.1, 100.0);
 
     // update
     while(1) {
