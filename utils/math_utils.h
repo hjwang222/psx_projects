@@ -178,19 +178,20 @@ public:
 
     int screen_x() const
     {
-        FixedPoint x = xyzw[0] + FixedPoint(1);
-        x = x * FixedPoint(320);
+        // perspective divide
+        FixedPoint x = (xyzw[0] / xyzw[3]) + FixedPoint(1);
         x = x / FixedPoint(2);
+        x = x * FixedPoint(320);
         
         return fix16_to_int(x.value);
     }
 
     int screen_y() const
     {
-        // flip vertical axis
-        FixedPoint y = xyzw[1] + FixedPoint(-1);
-        y = y * FixedPoint(240);
+        // flip vertical axis + perspective divide
+        FixedPoint y = (xyzw[1] / xyzw[3]) + FixedPoint(-1);
         y = y / FixedPoint(-2);
+        y = y * FixedPoint(240);
         return fix16_to_int(y.value);
     }
 
@@ -201,11 +202,7 @@ class Matrix
 public:
     FixedPoint m_values[4][4];
     Matrix() {
-        m_values[0][0] = m_values[1][1] = m_values[2][2] = m_values[3][3] = fix16_from_dbl(1.0);
-    }
-
-    Matrix(const fix16_t** mat) {
-        memcpy(m_values, mat, 16*sizeof(fix16_t));
+        m_values[0][0] = m_values[1][1] = m_values[2][2] = m_values[3][3] = FixedPoint(1.0);
     }
 
     Matrix(const double **values) {
@@ -216,36 +213,56 @@ public:
         }
     }
 
-    double m(int row, int col) {
-        return fix16_to_dbl(m_values[row][col].value);
-    }
-
-    void m(int row, int col, double val) {
-        m_values[row][col] = fix16_from_dbl(val);
-    }
-
-    Matrix operator*(const Matrix& mat) {
+    Matrix operator*(const Matrix& mat) const {
         Matrix result;
-        for (int row = 0 ; row < 4 ; row++) {
-            for (int col = 0; col < 4 ; col++) {
-                FixedPoint value;
-                for (int i = 0 ; i < 4 ; i++) {
-                    value = value + m_values[row][i] * mat.m_values[i][col];
-                    result.m_values[row][col] = value;
-                }
-            }
+
+        for (int i = 0 ; i < 4 ; i++) {
+            result.m_values[i][0] = m_values[i][0]*mat.m_values[0][0] +
+                                    m_values[i][1]*mat.m_values[1][0] +
+                                    m_values[i][2]*mat.m_values[2][0] +
+                                    m_values[i][3]*mat.m_values[3][0];
+
+            result.m_values[i][1] = m_values[i][0]*mat.m_values[0][1] +
+                                    m_values[i][1]*mat.m_values[1][1] +
+                                    m_values[i][2]*mat.m_values[2][1] +
+                                    m_values[i][3]*mat.m_values[3][1];
+
+            result.m_values[i][2] = m_values[i][0]*mat.m_values[0][2] +
+                                    m_values[i][1]*mat.m_values[1][2] +
+                                    m_values[i][2]*mat.m_values[2][2] +
+                                    m_values[i][3]*mat.m_values[3][2];
+
+            result.m_values[i][3] = m_values[i][0]*mat.m_values[0][3] +
+                                    m_values[i][1]*mat.m_values[1][3] +
+                                    m_values[i][2]*mat.m_values[2][3] +
+                                    m_values[i][3]*mat.m_values[3][3];  
         }
+
         return result;
     }
 
-    Vector operator*(const Vector& vec) {
+    Vector operator*(const Vector& vec) const {
         Vector result;
-        
-        for (int row = 0 ; row < 4 ; row++) {
-            for (int col = 0 ; col < 4 ; col++) {
-                result.xyzw[col] = vec.xyzw[col] * m_values[row][col];
-            }
-        }
+
+        result.xyzw[0] = vec.xyzw[0]*m_values[0][0] +
+                         vec.xyzw[1]*m_values[1][0] +
+                         vec.xyzw[2]*m_values[2][0] +
+                         vec.xyzw[3]*m_values[3][0];
+
+        result.xyzw[1] = vec.xyzw[0]*m_values[0][1] +
+                         vec.xyzw[1]*m_values[1][1] +
+                         vec.xyzw[2]*m_values[2][1] +
+                         vec.xyzw[3]*m_values[3][1];
+
+        result.xyzw[2] = vec.xyzw[0]*m_values[0][2] +
+                         vec.xyzw[1]*m_values[1][2] +
+                         vec.xyzw[2]*m_values[2][2] +
+                         vec.xyzw[3]*m_values[3][2];
+
+        result.xyzw[3] = vec.xyzw[0]*m_values[0][3] +
+                         vec.xyzw[1]*m_values[1][3] +
+                         vec.xyzw[2]*m_values[2][3] +
+                         vec.xyzw[3]*m_values[3][3]; 
 
         return result;
     }
@@ -254,15 +271,15 @@ public:
         Matrix result;
 
         // this is unlikely to be called too often so not using fixed point
-        double fov_rad = M_PI / 180;
-        double fov_tan = tan(fov * (M_PI/180));
+        double fov_rad = fov*(M_PI / 180);
+        double fov_tan = tan(fov_rad/2);
         
-        result.m(0,0, aspect*fov_tan);
-        result.m(1,1, 1/fov_tan);
-        result.m(2,2, (far + near)/(far - near));
-        result.m(2,3, -1);
-        result.m(3,2, (-2*far*near) / (far - near));
-        result.m(3,3, 0);
+        result.m_values[0][0] = FixedPoint(1/(aspect*fov_tan));
+        result.m_values[1][1] = FixedPoint(1/fov_tan);
+        result.m_values[2][2] = FixedPoint(-(far + near)/(far - near));
+        result.m_values[2][3] = FixedPoint(-1);
+        result.m_values[3][2] = FixedPoint(-(2*far*near) / (far - near));
+        result.m_values[3][3] = FixedPoint(0);
 
         return result;
     }

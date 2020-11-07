@@ -52,17 +52,23 @@ void render_update()
 {
     Matrix mvp = perspective_matrix;
 
-    Vector v0(0.0, 0.5, 0, 1.0);
-    Vector v1(-0.5, -0.5, 0, 1.0);
-    Vector v2(0.5, -0.5, 0, 1.0);
+    Vector v0(0.0, 0.2, -5.0, 1.0);
+    Vector v1(-0.2, -0.2, -5.0, 1.0);
+    Vector v2(0.2, -0.2, -5.0, 1.0);
 
-    // v0 = mvp*v0;
-    // v1 = mvp*v1;
-    // v2 = mvp*v2;
+    v0 = mvp*v0;
+    v1 = mvp*v1;
+    v2 = mvp*v2;
 
     GsPrintFont(0,0,"x %d y %d", v0.screen_x(), v0.screen_y());
     GsPrintFont(0,10,"x %d y %d", v1.screen_x(), v1.screen_y());
     GsPrintFont(0,20,"x %d y %d", v2.screen_x(), v2.screen_y());
+
+    for (int row = 0 ; row < 4 ; row++) {
+        for (int col = 0 ; col < 4 ; col++) {
+            GsPrintFont(0 + col*80, 200 + row*10, "%.2f", fix16_to_dbl(mvp.m_values[row][col].value));
+        }
+    }
 
     GsPoly3 tri;
     tri.r = 255;
@@ -111,8 +117,8 @@ int main()
     SetVBlankHandler(vblank);
 
     GsLoadFont(320,1,320,0);
-
-    perspective_matrix = Matrix::perspective(30.0, (double)WIDTH/HEIGHT, 0.1, 100.0);
+    double aspect = double(WIDTH)/HEIGHT;
+    perspective_matrix = Matrix::perspective(30.0, aspect, 0.1, 100.0);
 
     // update
     while(1) {
