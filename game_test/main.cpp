@@ -11,7 +11,6 @@ GsDispEnv game_disp_env;
 unsigned int game_draw_list[0x4000];
 
 unsigned int tick = 0;
-unsigned int last_tick = 0;
 
 #define CORNFLOUR_BLUE 100, 149, 237
 #define WIDTH 320
@@ -20,6 +19,7 @@ unsigned int last_tick = 0;
 
 Matrix perspective_matrix;
 Matrix view_matrix;
+static double angle = 0.0;
 
 void swap_buffers()
 {
@@ -41,6 +41,7 @@ void swap_buffers()
 void vblank()
 {
     tick++;
+    angle += 1;
 }
 
 void logic_update()
@@ -50,29 +51,40 @@ void logic_update()
 
 void render_update()
 {
-    Matrix mvp = perspective_matrix;
+    GsSortCls(0,0,0);
+    Matrix model = Matrix::translate(0,0,-10) * Matrix::rotate(angle,0,0);
+    Matrix mvp = perspective_matrix*view_matrix*model;
 
-    Vector v0(0.0, 0.2, -5.0, 1.0);
-    Vector v1(-0.2, -0.2, -5.0, 1.0);
-    Vector v2(0.2, -0.2, -5.0, 1.0);
+    Vector v0(0.0, 0.2, 0, 1.0);
+    Vector v1(-0.2, -0.2, 0, 1.0);
+    Vector v2(0.2, -0.2, 0, 1.0);
 
     v0 = mvp*v0;
     v1 = mvp*v1;
     v2 = mvp*v2;
 
-    GsPrintFont(0,0,"x %d y %d", v0.screen_x(), v0.screen_y());
-    GsPrintFont(0,10,"x %d y %d", v1.screen_x(), v1.screen_y());
-    GsPrintFont(0,20,"x %d y %d", v2.screen_x(), v2.screen_y());
+    // GsPrintFont(0,0,"x %d y %d", v0.screen_x(), v0.screen_y());
+    // GsPrintFont(0,10,"x %d y %d", v1.screen_x(), v1.screen_y());
+    // GsPrintFont(0,20,"x %d y %d", v2.screen_x(), v2.screen_y());
 
-    for (int row = 0 ; row < 4 ; row++) {
-        for (int col = 0 ; col < 4 ; col++) {
-            GsPrintFont(0 + col*80, 200 + row*10, "%.2f", fix16_to_dbl(mvp.m_values[row][col].value));
-        }
-    }
+    // for (int row = 0 ; row < 4 ; row++) {
+    //     for (int col = 0 ; col < 4 ; col++) {
+    //         GsPrintFont(0 + col*80, 200 + row*10, "%.2f", fix16_to_dbl(mvp.m_values[row][col].value));
+    //     }
+    // }
 
-    GsPoly3 tri;
-    tri.r = 255;
-    tri.g = tri.b = 0;
+    GsGPoly3 tri;
+    tri.r[0] = 255;
+    tri.g[0] = 0;
+    tri.b[0] = 0;
+    
+    tri.r[1] = 255;
+    tri.g[1] = 0;
+    tri.b[1] = 0;
+
+    tri.r[2] = 0;
+    tri.g[2] = 255;
+    tri.b[2] = 0;
 
     tri.x[0] = v0.screen_x();
     tri.y[0] = v0.screen_y();
@@ -83,7 +95,7 @@ void render_update()
     tri.x[2] = v2.screen_x();
     tri.y[2] = v2.screen_y();
 
-    GsSortPoly3(&tri);
+    GsSortGPoly3(&tri);
     GsDrawList();
 
     while(GsIsDrawing()) {};

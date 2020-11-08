@@ -61,6 +61,30 @@ public:
         result.value = fix16_div(value, val.value);
         return result;
     }
+
+    static FixedPoint tan(const FixedPoint& val) {
+        FixedPoint result;
+
+        result.value = fix16_tan(val.value);
+
+        return result;
+    }
+
+    static FixedPoint cos(const FixedPoint& val) {
+        FixedPoint result;
+
+        result.value = fix16_cos(val.value);
+
+        return result;
+    }
+
+    static FixedPoint sin(const FixedPoint& val) {
+        FixedPoint result;
+
+        result.value = fix16_sin(val.value);
+
+        return result;
+    }
 };
 
 class Vector{
@@ -284,13 +308,63 @@ public:
         return result;
     }
 
+    static Matrix translate(double x, double y, double z) {
+        Matrix result;
+
+        result.m_values[0][3] = FixedPoint(x);
+        result.m_values[1][3] = FixedPoint(y);
+        result.m_values[2][3] = FixedPoint(z);
+
+        return result;
+    }
+
     static Matrix scale(double x, double y, double z) {
         Matrix result;
 
-        result.m_values[0][0] = fix16_from_dbl(x);
-        result.m_values[1][1] = fix16_from_dbl(y);
-        result.m_values[2][2] = fix16_from_dbl(z);
+        result.m_values[0][0] = FixedPoint(x);
+        result.m_values[1][1] = FixedPoint(y);
+        result.m_values[2][2] = FixedPoint(z);
 
         return result;
+    }
+
+    static Matrix rotate(double x, double y, double z) {
+
+        // x
+        FixedPoint pi((double)M_PI);
+        FixedPoint r180(180);
+        Matrix x_rot;
+        {
+            FixedPoint angle(x);
+            angle = angle * (pi/r180);
+            x_rot.m_values[1][1] = FixedPoint::cos(angle);
+            x_rot.m_values[1][2] = FixedPoint(0) - FixedPoint::sin(angle);
+            x_rot.m_values[2][1] = FixedPoint::sin(angle);
+            x_rot.m_values[2][2] = FixedPoint::cos(angle);
+        }
+
+        // y
+        Matrix y_rot;
+        {
+            FixedPoint angle(y);
+            angle = angle * (pi/r180);
+            y_rot.m_values[0][0] = FixedPoint::cos(angle);
+            y_rot.m_values[0][2] = FixedPoint::sin(angle);
+            y_rot.m_values[2][0] = FixedPoint(0) - FixedPoint::sin(angle);
+            y_rot.m_values[2][2] = FixedPoint::cos(angle);
+        }
+
+        // z
+        Matrix z_rot;
+        {
+            FixedPoint angle(z);
+            angle = angle * (pi/r180);
+            z_rot.m_values[0][0] = FixedPoint::cos(angle);
+            z_rot.m_values[0][1] = FixedPoint(0) - FixedPoint::sin(angle);
+            z_rot.m_values[1][0] = FixedPoint::sin(angle);
+            z_rot.m_values[1][1] = FixedPoint::cos(angle);
+        }
+
+        return x_rot*y_rot*z_rot;
     }
 };
