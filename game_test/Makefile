@@ -1,11 +1,10 @@
 all:
 	mkdir -p cd_root
 	#-lm is for the math.h header and -lstdc++ is for c++ features like new/delete
-	psx-gcc -O2 -Wno-narrowing -I../utils -std=c++11 -o game.elf main.cpp -lm -lfixmath -lstdc++ -lmeidogte
+	psx-gcc -O2 -Wno-narrowing -fno-use-cxa-atexit -I../utils -std=c++11 -o game.elf main.cpp -lm -lfixmath -lstdc++ -lmeidogte
 	elf2exe game.elf game.exe
 	cp game.exe cd_root
-	#cp data/*.tim cd_root
-	#cp data/*.raw cd_root
+	cp data/*.stl cd_root
 	systemcnf game.exe > cd_root/system.cnf
 	mkisofs -o game.hsf -V GAME -sysid PLAYSTATION cd_root
 	mkpsxiso game.hsf game.bin /usr/local/psxsdk/share/licenses/infousa.dat

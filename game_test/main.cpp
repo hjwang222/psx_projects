@@ -5,6 +5,7 @@ extern "C"
     #include <string.h>
 }
 #include "math_utils.h"
+#include "mesh.h"
 
 GsDrawEnv game_draw_env;
 GsDispEnv game_disp_env;
@@ -20,6 +21,9 @@ unsigned int tick = 0;
 Matrix perspective_matrix;
 Matrix view_matrix;
 static double angle = 0.0;
+bool model_loaded = false;
+
+Mesh mesh;
 
 void swap_buffers()
 {
@@ -52,8 +56,9 @@ void logic_update()
 void render_update()
 {
     GsSortCls(0,0,0);
-    Matrix model = Matrix::translate(0,0,-10) * Matrix::rotate(angle,0,0);
-    Matrix mvp = perspective_matrix*view_matrix*model;
+    Matrix model = Matrix::translate(0,0,-10) * Matrix::rotate(0,0,angle);
+    Matrix vp = perspective_matrix*view_matrix;
+    Matrix mvp = vp*model;
 
     Vector v0(0.0, 0.2, 0, 1.0);
     Vector v1(-0.2, -0.2, 0, 1.0);
@@ -63,6 +68,14 @@ void render_update()
     v1 = mvp*v1;
     v2 = mvp*v2;
 
+    if (model_loaded) {
+        GsPrintFont(0,0,"Model Loaded");
+    }
+    else
+    {
+        GsPrintFont(0,0,"Model NOT Loaded");
+    }
+    
     // GsPrintFont(0,0,"x %d y %d", v0.screen_x(), v0.screen_y());
     // GsPrintFont(0,10,"x %d y %d", v1.screen_x(), v1.screen_y());
     // GsPrintFont(0,20,"x %d y %d", v2.screen_x(), v2.screen_y());
@@ -96,6 +109,9 @@ void render_update()
     tri.y[2] = v2.screen_y();
 
     GsSortGPoly3(&tri);
+
+    mesh.draw(vp);
+
     GsDrawList();
 
     while(GsIsDrawing()) {};
@@ -131,6 +147,8 @@ int main()
     GsLoadFont(320,1,320,0);
     double aspect = double(WIDTH)/HEIGHT;
     perspective_matrix = Matrix::perspective(30.0, aspect, 0.1, 100.0);
+
+    model_loaded = mesh.load_stl("cdrom:box.stl");
 
     // update
     while(1) {

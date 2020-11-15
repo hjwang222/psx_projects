@@ -1,9 +1,8 @@
+#pragma once
 extern "C" {
     #include <math.h>
     // fixmath tries to include fix16.hpp if defined
-    #undef __cplusplus
     #include <fixmath.h>
-    #define __cplusplus
 }
 
 class FixedPoint
@@ -17,6 +16,10 @@ public:
 
     FixedPoint(const int& val) {
         value = fix16_from_int(val);
+    }
+
+    FixedPoint(const float& val) {
+        value = fix16_from_float(val);
     }
 
     FixedPoint(const double& val) {
@@ -93,6 +96,28 @@ public:
     Vector()
     {
         xyzw[0] = xyzw[1] = xyzw[2] = xyzw[3] = FixedPoint(0);
+    }
+
+    Vector(float x, float y, float z) {
+        xyzw[0] = FixedPoint(x);
+        xyzw[1] = FixedPoint(y);
+        xyzw[2] = FixedPoint(z);
+        xyzw[3] = FixedPoint(1.0);
+    }
+
+    Vector(float x, float y, float z, float w)
+    {
+        xyzw[0] = FixedPoint(x);
+        xyzw[1] = FixedPoint(y);
+        xyzw[2] = FixedPoint(z);
+        xyzw[3] = FixedPoint(w);
+    }
+
+    Vector(double x, double y, double z) {
+        xyzw[0] = FixedPoint(x);
+        xyzw[1] = FixedPoint(y);
+        xyzw[2] = FixedPoint(z);
+        xyzw[3] = FixedPoint(1.0);
     }
 
     Vector(double x, double y, double z, double w)
